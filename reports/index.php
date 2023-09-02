@@ -1,0 +1,110 @@
+<?php
+session_start();
+
+include '../includes/functions.inc.php';
+include '../includes/dbh.inc.php';
+
+if (!isset($_SESSION["name"])) {
+  header("Location: ../signin.php");
+  die();
+}
+
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Patient Management System</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+  <div class="navBar">
+    <div class="navBar-centered">
+      <div class="navBar-centered">
+        <a href="../includes/logout.inc.php">Log out</a>
+        <a href="../receptionists/">Receptionists</a>
+        <a href="" class="active">Reports</a>
+        <a href="../bills/">Bills</a>
+        <a href="../rooms/">Rooms</a>
+        <a href="../admissions/">Admissions</a>
+        <a href="../appointments/">Appointments</a>
+        <a href="../doctors/">Doctors</a>
+        <a href="../outpatient/">Out Patients</a>
+        <a href="../inpatient/">In Patients</a>
+        <a href="../">Patients</a>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="horizontalContainer">
+      <h2 style="margin-right: 20px;">Reports</h2>
+      <form action='create.php' method='POST'>
+        <button name='add' class='addBtn'><strong>+</strong></button>
+      </form>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <strong>
+            <?php
+            if (isset($_GET['sort'])) {
+              $sort = $_GET['sort'];
+            } else {
+              $sort = 'ASC';
+            }
+            $sort == 'DESC' ? $sort = 'ASC' : $sort = 'DESC';
+            echo "<strong>";
+            echo "<th><a class='sort' href='?table=report&order=report_id&sort=$sort'>Report ID</a></th>";
+            echo "<th><a class='sort' href='?table=report&order=date&sort=$sort'>Date</a></th>";
+            echo "<th><a class='sort' href='?table=report&order=category&sort=$sort'>Category</a></th>";
+            echo "<th><a class='sort' href='?table=report&order=doctor_id&sort=$sort'>Doctor ID</a></th>";
+            echo "<th><a class='sort' href='?table=report&order=information&sort=$sort'>Information</a></th>";
+            echo "</strong>";
+            ?>
+            <th>Update</th>
+            <th>Delete</th>
+          </strong>
+        </tr>
+      </thead>
+      <tbody>
+        <?php
+        $sql = "SELECT * FROM report;";
+        $result = $conn->query($sql);
+        if ($result->num_rows == 0) {
+          echo '<tr><td colspan="10">No Rows Returned</td></tr>';
+        } else {
+          while ($row = $result->fetch_assoc()) {
+            echo "
+              <tr>
+                <td>{$row['report_id']}</td>
+                <td>{$row['date']}</td>
+                <td>{$row['category']}</td>
+                <td>{$row['doctor_id']}</td>
+                <td>{$row['information']}</td>
+                <td>
+                <form action='update.php?report_id={$row['report_id']}' method='POST'>
+                <button class='button2'><strong>Update</strong></button>
+                </form>
+                </td>
+                <td>
+                <form action='delete.php?report_id={$row['report_id']}' method='POST'>
+                <button class='button2'><strong>Delete</strong></button>
+                </form>
+                </td>
+              </tr>";
+          }
+        }
+        if (isset($_GET['order']) && $result->num_rows == 0) {
+          $order = $_GET['order'];
+          $sql = "SELECT * FROM report ORDER BY $order $sort";
+        }
+        ?>
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>
